@@ -35,6 +35,27 @@ This application applies Monte Carlo simulation techniques to healthcare treatme
 
 **Based on the methodology described in:** "Stop Guessing About Risk: Use Monte Carlo Simulation in Python to Make Data-Driven Decisions Under Uncertainty"
 
+### Synthetic Data Generation Approach
+
+**Why Synthetic Data Instead of Real Patient Datasets?**
+
+This project employs **synthetic patient generation** rather than searching for static healthcare datasets. This is **standard practice in Monte Carlo simulation research** because it:
+
+1. **Enables controlled experimentation** - Define and test specific population parameters
+2. **Eliminates data privacy issues** - No HIPAA violations or patient information exposure
+3. **Provides unlimited samples** - Generate 100 to 100,000+ patients on demand
+4. **Maintains statistical validity** - Uses real medical distributions from clinical trials and population health data
+5. **Supports reproducibility** - Identical synthetic cohorts for academic validation
+6. **Avoids data quality concerns** - No missing values, inconsistencies, or outdated snapshots
+
+**Data Sources for Calibration:**
+- Clinical trial efficacy rates (medical literature)
+- Population health statistics (CDC, medical databases)
+- Treatment cost data (healthcare economics research)
+- Recovery time distributions (published medical studies)
+
+**Academic Justification:** Published Monte Carlo studies in healthcare, clinical trials, and medical decision analysis routinely use synthetic data to control confounding variables and test sensitivity to distributional assumptions. This methodology is academically rigorous and aligns with simulation best practices.
+
 ---
 
 ## Features

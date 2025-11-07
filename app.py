@@ -20,6 +20,14 @@ sys.path.append(str(Path(__file__).parent / 'src'))
 from data_generator import HealthcareDataGenerator
 from monte_carlo_simulator import MonteCarloHealthcareSimulator
 from analysis import HealthcareAnalyzer
+from gemini_helper import (
+    create_gemini_button_with_report,
+    generate_patient_report,
+    generate_simulation_report,
+    generate_analysis_report,
+    generate_single_patient_report,
+    add_sensitivity_sliders
+)
 
 
 # Page configuration
@@ -89,15 +97,47 @@ def main():
 
         st.divider()
 
+        # Add sensitivity parameter sliders RIGHT AFTER mode selection
+        sensitivity_params = add_sensitivity_sliders()
+        # Store in session state for access by simulation functions
+        st.session_state['sensitivity_params'] = sensitivity_params
+
+        st.divider()
+
+        # About section at BOTTOM
         st.markdown("""
         ### About
-        This tool implements:
-        - Synthetic patient data generation
-        - Monte Carlo treatment simulation
-        - Statistical risk assessment
-        - Comparative treatment analysis
 
-        **Developed for academic research and clinical decision support.**
+        **Monte Carlo Methodology & Data Approach**
+
+        This application employs **synthetic patient generation** rather than
+        static datasets. This is standard practice in Monte Carlo simulation
+        research because it:
+
+        - Enables controlled experimentation with population parameters
+        - Eliminates data privacy, quality, and availability concerns
+        - Provides unlimited sample generation (100 to 100,000+ patients)
+        - Maintains statistical validity using real medical distributions
+        - Supports academic reproducibility
+
+        Each synthetic patient is generated using probability distributions
+        calibrated to medical literature, clinical trials, and population health data.
+
+        **Monte Carlo Simulations:**
+        - 10,000+ scenarios per patient
+        - Probabilistic modeling of treatment outcomes, costs, recovery
+        - Risk quantification through distribution analysis
+
+        **Treatment-Specific Factors:**
+        - Treatment efficacy rates
+        - Complication risks
+        - Cost variations
+        - Recovery time uncertainty
+
+        **Academic Justification:** Published Monte Carlo studies in healthcare,
+        clinical trials, and medical decision analysis routinely use synthetic data
+        to control confounding variables and test sensitivity to distributional
+        assumptions.
         """)
 
     # Main content based on selected mode
@@ -220,7 +260,14 @@ def generate_patient_data_page():
             height=400
         )
 
+        # Gemini AI Integration
+        st.markdown("---")
+        st.subheader("🤖 Ask Gemini About This Dataset")
+        patient_report = generate_patient_report(df)
+        create_gemini_button_with_report(patient_report, "patient_data")
+
         # Download option
+        st.markdown("---")
         csv = df.to_csv(index=False)
         st.download_button(
             label="📥 Download Patient Data (CSV)",
@@ -329,6 +376,19 @@ def run_simulations_page():
             use_container_width=True
         )
 
+        # Gemini AI Integration
+        st.markdown("---")
+        st.subheader("🤖 Ask Gemini About These Results")
+        simulation_report = generate_simulation_report(
+            results,
+            {
+                'num_simulations': num_simulations,
+                'sample_size': sample_size,
+                'time_horizon': 365
+            }
+        )
+        create_gemini_button_with_report(simulation_report, "simulation_results")
+
 
 def analyze_results_page():
     """Page for analyzing simulation results"""
@@ -386,6 +446,17 @@ def analyze_results_page():
     with st.spinner("Generating visualizations..."):
         fig = analyzer.generate_visualization_report(results)
         st.pyplot(fig)
+
+    # Gemini AI Integration
+    st.markdown("---")
+    st.subheader("🤖 Ask Gemini About This Analysis")
+    analysis_report = generate_analysis_report({
+        'total_treatments': len(results),
+        'overall_success': summary['overall_metrics']['mean_success_rate'] * 100,
+        'mean_improvement': summary['overall_metrics'].get('mean_severity_reduction', 0),
+        'treatment_comparison': {}  # Could be enhanced with actual comparison
+    })
+    create_gemini_button_with_report(analysis_report, "analysis_results")
 
     # Export options
     st.subheader("💾 Export Results")
@@ -568,6 +639,20 @@ def single_patient_analysis_page():
 
                 Median: {fastest_treatment[1]['recovery_time']['median']:.0f} days
                 """)
+
+            # Gemini AI Integration
+            st.markdown("---")
+            st.subheader("🤖 Ask Gemini About This Patient")
+            single_patient_report = generate_single_patient_report(
+                {
+                    'age': patient['age'],
+                    'severity_score': patient['baseline_severity'],
+                    'num_comorbidities': 0,  # Add if available
+                    'condition': patient['disease']
+                },
+                comparison
+            )
+            create_gemini_button_with_report(single_patient_report, "single_patient")
 
 
 if __name__ == "__main__":
